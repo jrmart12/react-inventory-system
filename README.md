@@ -1,4 +1,4 @@
-#Inventory System
+# Inventory System
 
 https://babyheaveninventory.netlify.app/
 
