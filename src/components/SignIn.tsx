@@ -13,7 +13,7 @@ const SignIn = () => {
   const handleSignIn = async () => {
     const { success, error } = await signInWithEmail(email, password);
     if (success) {
-      navigate('/dashboard');
+      navigate("/dashboard/home");
     } else {
       alert(error);
     }

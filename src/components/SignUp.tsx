@@ -20,7 +20,7 @@ const SignUp = () => {
 
     const { success, error } = await signUpWithEmail(email, password);
     if (success) {
-      navigate('/dashboard');
+      navigate("/dashboard/home");
     } else {
       alert(error);
     }
