@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Typography, Table, Space,Input } from 'antd';
 import { format, startOfMonth, endOfMonth } from "date-fns";
-const { Title, Text } = Typography;
+import "../sass/pages/SalesReport.scss";
+const { Title } = Typography;
 
 interface SellsOrder {
   id: number;
@@ -155,21 +156,30 @@ const filterSalesByMonth = () => {
 const { filteredSales, totalSales, totalProfit } = filterSalesByMonth();
 
 return (
-  <div>
+  <div className="sales-report-container">
     <Title level={3}>Sales Report</Title>
     <Space style={{ marginBottom: 16 }}>
-      <Text>Filter by Month:</Text>
+      <Typography.Text className="filter-label">
+        Filter by Month:
+      </Typography.Text>
       <Input
-          type="month"
-          value={filterMonth}
-          onChange={(e) =>{
-            setFilterMonth(e.target.value)}}
-        />
+        type="month"
+        value={filterMonth}
+        onChange={(e) => {
+          setFilterMonth(e.target.value);
+        }}
+      />
     </Space>
-    <Table dataSource={filteredSales} columns={salesColumns} rowKey="id" />
-    <div style={{ display: "flex", justifyContent: "space-between", flexDirection: "row" }}>
-      <Text>Total Sales: Lps {totalSales.toFixed(2)}</Text>
-      <Text>Total Profit: Lps {totalProfit.toFixed(2)}</Text>
+    <div className="table-container">
+      <Table dataSource={filteredSales} columns={salesColumns} rowKey="id" />
+    </div>
+    <div className="totals-container">
+      <Typography.Text>
+        Total Sales: Lps {totalSales.toFixed(2)}
+      </Typography.Text>
+      <Typography.Text>
+        Total Profit: Lps {totalProfit.toFixed(2)}
+      </Typography.Text>
     </div>
   </div>
 );

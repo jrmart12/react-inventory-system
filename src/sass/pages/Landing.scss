@@ -1,0 +1,49 @@
+// Landing.scss
+
+// Responsive styles for Header
+@media (max-width: 768px) {
+  .ant-layout-header {
+    padding: 0 1rem;
+
+    .ant-menu {
+      flex-wrap: wrap;
+      justify-content: center;
+
+    }
+  }
+}
+
+// Responsive styles for Content
+@media (max-width: 576px) { // Change the breakpoint to a smaller value for mobile devices
+  .ant-layout-content {
+  width: 100%;
+
+    .ant-space-vertical {
+      max-width: 100% !important; 
+      .ant-typography {
+        text-align: center;
+      }
+    }
+
+    .ant-row {
+      display: flex;
+      flex-direction: column;
+
+      .ant-col {
+        display: flex !important;
+        max-width: 100% !important; 
+        justify-content: center;
+        margin-bottom: 2rem;
+        text-align: center; // Center align the content within each column
+      }
+    }
+  }
+}
+
+// Responsive styles for Footer
+@media (max-width: 576px) { // Change the breakpoint to a smaller value for mobile devices
+  .ant-layout-footer {
+    padding: 1rem;
+    text-align: center; // Center align the footer text
+  }
+}

@@ -13,6 +13,7 @@ import {
   Select,
 } from "antd";
 import { supabase } from "../supabaseClient";
+import "../sass/pages/Sells.scss";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -56,7 +57,9 @@ const Sells: React.FC = () => {
   const calculateSubtotal = () => {
     const items = form.getFieldValue("items") || [];
     const newSubtotal = items.reduce(
-      (total: number, item: { price?: number; quantity?: number }) => total + (item?.price ?? 0) * (item?.quantity ?? 0),      0
+      (total: number, item: { price?: number; quantity?: number }) =>
+        total + (item?.price ?? 0) * (item?.quantity ?? 0),
+      0
     );
     form.setFieldsValue({ subtotal: newSubtotal });
     form.setFieldsValue({ total: newSubtotal });
@@ -67,22 +70,14 @@ const Sells: React.FC = () => {
   const fetchSellsOrders = async () => {
     try {
       const [year, month] = filterMonth.split("-");
-      const startOfMonthDate = startOfMonth(
-        new Date(+year, +month - 1, 1)
-      );
+      const startOfMonthDate = startOfMonth(new Date(+year, +month - 1, 1));
       const endOfMonthDate = endOfMonth(new Date(+year, +month - 1, 1));
 
       const { data, error } = await supabase
         .from("Sales")
         .select("*")
-        .gte(
-          "sales_order_date",
-          format(startOfMonthDate, "yyyy-MM-dd")
-        )
-        .lte(
-          "sales_order_date",
-          format(endOfMonthDate, "yyyy-MM-dd")
-        );
+        .gte("sales_order_date", format(startOfMonthDate, "yyyy-MM-dd"))
+        .lte("sales_order_date", format(endOfMonthDate, "yyyy-MM-dd"));
 
       if (error) {
         console.error("Error fetching sells orders:", error);
@@ -96,9 +91,7 @@ const Sells: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const { data, error } = await supabase
-        .from("Products")
-        .select("*")
+      const { data, error } = await supabase.from("Products").select("*");
       if (error) {
         console.error("Error fetching products:", error);
       } else {
@@ -109,39 +102,39 @@ const Sells: React.FC = () => {
     }
   };
 
+  const handleCreateOrder = async () => {
+    setIsCreatingOrder(true);
+    setEditingOrder(null);
 
+    try {
+      // Fetch the count of existing sales orders
+      const { data: salesCount, error: salesCountError } = await supabase
+        .from("Sales")
+        .select("id", { count: "exact" });
 
-const handleCreateOrder = async () => {
-  setIsCreatingOrder(true);
-  setEditingOrder(null);
+      if (salesCountError) {
+        console.error("Error fetching sales count:", salesCountError);
+      } else {
+        // Generate the sales order number
+        const salesOrderCount = salesCount.length + 1;
+        const salesOrderNumber = `BO-${String(salesOrderCount).padStart(
+          6,
+          "0"
+        )}`;
 
-  try {
-    // Fetch the count of existing sales orders
-    const { data: salesCount, error: salesCountError } = await supabase
-      .from("Sales")
-      .select("id", { count: "exact" });
-
-    if (salesCountError) {
-      console.error("Error fetching sales count:", salesCountError);
-    } else {
-      // Generate the sales order number
-      const salesOrderCount = salesCount.length + 1;
-      const salesOrderNumber = `BO-${String(salesOrderCount).padStart(6, "0")}`;
-
-      // Set the initial form values with the generated sales order number
-      form.setFieldsValue({
-        sales_order: salesOrderNumber,
-        sales_order_date: '',
-        items: [],
-        subtotal: 0,
-        total: 0,
-      });
+        // Set the initial form values with the generated sales order number
+        form.setFieldsValue({
+          sales_order: salesOrderNumber,
+          sales_order_date: "",
+          items: [],
+          subtotal: 0,
+          total: 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error generating sales order number:", error);
     }
-  } catch (error) {
-    console.error("Error generating sales order number:", error);
-  }
-};
-
+  };
 
   const handleSaveOrder = async (values: SellsOrder) => {
     try {
@@ -159,7 +152,6 @@ const handleCreateOrder = async () => {
           console.error("Error creating sales order:", error);
         } else {
           for (const item of values.items) {
-  
             const { data: dataProducts, error: errorProducts } = await supabase
               .from("Products")
               .select("*")
@@ -233,35 +225,38 @@ const handleCreateOrder = async () => {
       key: "total",
       render: (total: number) => <Text>Lps {total.toFixed(2)}</Text>,
     },
-   ];
+  ];
 
   return (
-    <div>
+    <div className="sells-container">
       <Title level={2}>Sales</Title>
-      <Space style={{ marginBottom: 16 }}>
-        <Text>Filter by Month:</Text>
+      <Space className="filter-container" style={{ marginBottom: 16 }}>
+        <Text className="filter-label">Filter by Month:</Text>
         <Input
           type="month"
           value={filterMonth}
-          onChange={(e) =>{
-            setFilterMonth(e.target.value)}}
+          onChange={(e) => {
+            setFilterMonth(e.target.value);
+          }}
         />
         <Button type="primary" onClick={handleCreateOrder}>
           Create Order
         </Button>
       </Space>
-      
-      <Table
-        dataSource={sellsOrders}
-        columns={columns}
-        rowKey="id"
-        pagination={{ pageSize: 10 }}
-      />
+      <div className="table-container">
+        <Table
+          dataSource={sellsOrders}
+          columns={columns}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+        />
+      </div>
       <Modal
         title={editingOrder ? "Edit Order" : "Create Order"}
         open={isCreatingOrder}
         onCancel={handleCancelOrder}
         footer={null}
+        className="order-modal"
       >
         <Form
           form={form}
@@ -290,17 +285,23 @@ const handleCreateOrder = async () => {
           >
             <DatePicker />
           </Form.Item>
-  
+
           <Form.List name="items">
             {(fields, { add, remove }) => (
-              <>
+              <div>
                 <p style={{ fontWeight: "bold", textDecoration: "underline" }}>
                   Products
                 </p>
 
                 {fields.map((field, index) => (
-                  <Space key={field.key} align="center">
-                    <div style={{ display: "flex", flexDirection: "column" }}>
+                  <Space className="items-modal" key={field.key} align="center">
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        width: "100%",
+                      }}
+                    >
                       <p>Name</p>
                       <Form.Item
                         name={[index, "product"]}
@@ -315,7 +316,6 @@ const handleCreateOrder = async () => {
                           placeholder="Select a Product"
                           showSearch
                           optionFilterProp="children"
-                      
                           onSelect={(value) => {
                             const selectedProduct = products.find(
                               (product) => product.name === value
@@ -330,12 +330,12 @@ const handleCreateOrder = async () => {
                           }}
                         >
                           {products
-                          .filter((product) => product.inventory > 0)
-                          .map((product) => (
-                            <Option key={product.id} value={product.name}>
-                              {product.name} ({product.selling_price}Lps)
-                            </Option>
-                          ))}
+                            .filter((product) => product.inventory > 0)
+                            .map((product) => (
+                              <Option key={product.id} value={product.name}>
+                                {product.name} ({product.selling_price}Lps)
+                              </Option>
+                            ))}
                         </Select>
                       </Form.Item>
                     </div>
@@ -422,7 +422,7 @@ const handleCreateOrder = async () => {
                     marginBottom: "20px",
                   }}
                 ></div>
-              </>
+              </div>
             )}
           </Form.List>
           <div
@@ -457,7 +457,7 @@ const handleCreateOrder = async () => {
                 },
               ]}
             >
-              <InputNumber min={0} step={0.01}  value={total} />
+              <InputNumber min={0} step={0.01} value={total} />
             </Form.Item>
           </div>
           <Form.Item>
@@ -470,7 +470,7 @@ const handleCreateOrder = async () => {
           </Form.Item>
         </Form>
       </Modal>
-      <div>
+      <div className="month-totals">
         <Title level={4}>Sales of the Month ({filterMonth})</Title>
         <Text>
           Total Sells: Lps{" "}

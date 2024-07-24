@@ -1,0 +1,19 @@
+.inventory-report-container {
+  .table-container {
+    .ant-table-wrapper {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .inventory-report-container {
+    .table-container {
+      .ant-table-wrapper {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+    }
+  }
+}

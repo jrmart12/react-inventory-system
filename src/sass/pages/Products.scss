@@ -1,0 +1,37 @@
+
+.products-container {
+  .search-input {
+    width: 300px;
+    margin-bottom: 16px;
+  }
+
+  .table-container {
+    .ant-table-wrapper {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .product-image {
+      max-width: 100px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .products-container {
+    .search-input {
+      width: 100%;
+    }
+
+    .table-container {
+      .ant-table-wrapper {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      .product-image {
+        max-width: 80px;
+      }
+    }
+  }
+}

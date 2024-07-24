@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Layout, Menu, Typography, Space, Image, Row, Col } from 'antd';
 import babyHeavenLogo from '../assets/BABY-HEAVEN-LOGO.jpg';
 import { ToolOutlined, ShoppingCartOutlined, OrderedListOutlined, BarChartOutlined } from '@ant-design/icons';
-
+import "../sass/pages/Landing.scss";
 const { Header, Content, Footer } = Layout;
 const { Title, Text } = Typography;
 

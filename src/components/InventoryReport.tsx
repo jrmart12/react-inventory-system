@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Typography, Table,  } from "antd";
+import "../sass/pages/InventoryReport.scss";
 const { Title, Text } = Typography;
 interface Product {
   id: number;
@@ -60,21 +61,23 @@ function InventoryReport() {
     fetchProducts();
   }, []);
   return (
-    <div>
+    <div className="inventory-report-container">
       <Title level={3}>Inventory Report</Title>
-      <Table
-        dataSource={products}
-        columns={inventoryColumns}
-        pagination={false}
-        rowKey="id"
-        footer={() => (
-          <div>
-            <Text>
-              Total Inventory Cost: Lps {totalInventoryCost.toFixed(2)}
-            </Text>
-          </div>
-        )}
-      />
+      <div className="table-container">
+        <Table
+          dataSource={products}
+          columns={inventoryColumns}
+          pagination={false}
+          rowKey="id"
+          footer={() => (
+            <div>
+              <Text>
+                Total Inventory Cost: Lps {totalInventoryCost.toFixed(2)}
+              </Text>
+            </div>
+          )}
+        />
+      </div>
     </div>
   );
 }

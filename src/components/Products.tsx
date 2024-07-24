@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { Button, Input, Table, Form, Popconfirm, Modal } from "antd";
-
+import "../sass/pages/Products.scss";
 interface Product {
   id: number;
   created_at: string;
@@ -140,7 +140,7 @@ const ProductsPage = () => {
   ];
 
   return (
-    <div>
+    <div className="products-container">
       <h1>Products</h1>
       <div style={{ marginBottom: "16px" }}>
         <Input
@@ -160,7 +160,7 @@ const ProductsPage = () => {
           onOk={createProduct}
           onCancel={() => {
             setIsModalOpen(false);
-            setPreviewImageUrl('');
+            setPreviewImageUrl("");
           }}
         >
           <Form form={form} layout="vertical">
@@ -207,14 +207,21 @@ const ProductsPage = () => {
                 { required: true, message: "Please enter an image URL!" },
               ]}
             >
-              <Input placeholder="Image URL"  onChange={(e) => setPreviewImageUrl(e.target.value)}/>
+              <Input
+                placeholder="Image URL"
+                onChange={(e) => setPreviewImageUrl(e.target.value)}
+              />
             </Form.Item>
             {previewImageUrl && (
-      <div style={{ marginTop: '16px' }}>
-        <p>Image Preview:</p>
-        <img src={previewImageUrl} alt="Product" style={{ maxWidth: '200px' }} />
-      </div>
-    )}
+              <div style={{ marginTop: "16px" }}>
+                <p>Image Preview:</p>
+                <img
+                  src={previewImageUrl}
+                  alt="Product"
+                  style={{ maxWidth: "200px" }}
+                />
+              </div>
+            )}
           </Form>
         </Modal>
         <Modal
@@ -224,7 +231,7 @@ const ProductsPage = () => {
           onCancel={() => {
             setIsEditModalOpen(false);
             setEditingProduct(null);
-            setPreviewImageUrl('');
+            setPreviewImageUrl("");
           }}
         >
           <Form form={form} layout="vertical">
@@ -271,20 +278,26 @@ const ProductsPage = () => {
                 { required: true, message: "Please enter an image URL!" },
               ]}
             >
-              <Input placeholder="Image URL"  onChange={(e) => setPreviewImageUrl(e.target.value)}/>
+              <Input
+                placeholder="Image URL"
+                onChange={(e) => setPreviewImageUrl(e.target.value)}
+              />
             </Form.Item>
             {previewImageUrl && (
-      <div style={{ marginTop: '16px' }}>
-        <p>Image Preview:</p>
-        <img src={previewImageUrl} alt="Product" style={{ maxWidth: '200px' }} />
-      </div>
-    )}
+              <div style={{ marginTop: "16px" }}>
+                <p>Image Preview:</p>
+                <img
+                  src={previewImageUrl}
+                  alt="Product"
+                  style={{ maxWidth: "200px" }}
+                />
+              </div>
+            )}
             {/* Add more Form.Item components for other columns */}
           </Form>
         </Modal>
       </div>
-      <div>
-        <div style={{ paddingTop: "20px" }}></div>
+      <div className="table-container">
         <Table dataSource={products} columns={columns} rowKey="id" />
       </div>
     </div>
