@@ -25,6 +25,7 @@ interface SellsOrder {
   items: { product: string; quantity: number; price: number }[];
   subtotal: number;
   total: number;
+  payed_in: string;
 }
 
 interface Product {
@@ -141,13 +142,15 @@ const Sells: React.FC = () => {
       if (editingOrder) {
         const { error } = await supabase
           .from("Sales")
-          .update(values)
+          .update({ ...values, payed_in: values.payed_in })
           .eq("id", editingOrder.id);
         if (error) {
           console.error("Error updating Sales order:", error);
         }
       } else {
-        const { error } = await supabase.from("Sales").insert([values]);
+        const { error } = await supabase
+          .from("Sales")
+          .insert([{ ...values, payed_in: values.payed_in }]);
         if (error) {
           console.error("Error creating sales order:", error);
         } else {
@@ -225,6 +228,12 @@ const Sells: React.FC = () => {
       key: "total",
       render: (total: number) => <Text>Lps {total.toFixed(2)}</Text>,
     },
+    {
+      title: "Payment Method",
+      dataIndex: "payed_in",
+      key: "payed_in",
+      render: (payedIn: string) => <Text>{payedIn}</Text>,
+    },
   ];
 
   return (
@@ -267,6 +276,7 @@ const Sells: React.FC = () => {
             items: [],
             subtotal: 0,
             total: 0,
+            payed_in: undefined,
           }}
         >
           <Form.Item
@@ -425,6 +435,26 @@ const Sells: React.FC = () => {
               </div>
             )}
           </Form.List>
+          <Form.Item
+            name="payed_in"
+            label="Paid In"
+            rules={[
+              { required: true, message: "Please select a payment method" },
+            ]}
+          >
+            <Select placeholder="Select payment method">
+              <Option value="Bac Credomatic: Nidia Martinez">
+                Bac Credomatic: Nidia Martinez
+              </Option>
+              <Option value="Banco Atlantida: Jose Martinez">
+                Banco Atlantida: Jose Martinez
+              </Option>
+              <Option value="Banco Occidente: Rosa Bardales">
+                Banco Occidente: Rosa Bardales
+              </Option>
+              <Option value="Cash">Cash</Option>
+            </Select>
+          </Form.Item>
           <div
             style={{
               marginTop: "20px",
