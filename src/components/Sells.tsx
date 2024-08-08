@@ -452,7 +452,7 @@ const Sells: React.FC = () => {
               <Option value="Banco Occidente: Rosa Bardales">
                 Banco Occidente: Rosa Bardales
               </Option>
-              <Option value="Banco Occidente: Rosa Bardales">
+              <Option value="C807 Express: Pagado en Efectivo al recibir">
                 C807 Express: Pagado en Efectivo al recibir
               </Option>
               <Option value="Cash">Cash</Option>
