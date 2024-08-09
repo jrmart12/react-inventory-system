@@ -26,6 +26,7 @@ interface SellsOrder {
   subtotal: number;
   total: number;
   payed_in: string;
+  notes?: string;
 }
 
 interface Product {
@@ -50,6 +51,9 @@ const Sells: React.FC = () => {
 
   const [subtotal, setSubtotal] = useState(0);
   const [total, setTotal] = useState(0);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<SellsOrder | null>(null);
+
   useEffect(() => {
     fetchSellsOrders();
     fetchProducts();
@@ -130,6 +134,7 @@ const Sells: React.FC = () => {
           items: [],
           subtotal: 0,
           total: 0,
+          notes: "",
         });
       }
     } catch (error) {
@@ -184,9 +189,16 @@ const Sells: React.FC = () => {
   };
 
   const handleCancelOrder = () => {
+    setIsModalVisible(false);
     setIsCreatingOrder(false);
     setEditingOrder(null);
+    setSelectedOrder(null);
     form.resetFields();
+  };
+
+  const handleRowClick = (record: SellsOrder) => {
+    setSelectedOrder(record);
+    setIsModalVisible(true);
   };
 
   const columns = [
@@ -258,250 +270,302 @@ const Sells: React.FC = () => {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 10 }}
+          onRow={(record) => ({
+            onClick: () => handleRowClick(record),
+          })}
         />
       </div>
       <Modal
-        title={editingOrder ? "Edit Order" : "Create Order"}
-        open={isCreatingOrder}
+        title={selectedOrder ? "Order Details" : "Create Order"}
+        open={isCreatingOrder || isModalVisible}
         onCancel={handleCancelOrder}
         footer={null}
         className="order-modal"
       >
-        <Form
-          form={form}
-          onFinish={handleSaveOrder}
-          initialValues={{
-            sales_order: "",
-            sales_order_date: "",
-            items: [],
-            subtotal: 0,
-            total: 0,
-            payed_in: undefined,
-          }}
-        >
-          <Form.Item
-            name="sales_order"
-            label="Sales Order"
-            rules={[{ required: true, message: "Please enter a sales order" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="sales_order_date"
-            label="Sales Order Date"
-            rules={[
-              { required: true, message: "Please select a sales order date" },
-            ]}
-          >
-            <DatePicker />
-          </Form.Item>
-
-          <Form.List name="items">
-            {(fields, { add, remove }) => (
-              <div>
-                <p style={{ fontWeight: "bold", textDecoration: "underline" }}>
-                  Products
+        {selectedOrder ? (
+          <div>
+            <p>
+              <strong>Sales Order:</strong> {selectedOrder.sales_order}
+            </p>
+            <p>
+              <strong>Sales Order Date:</strong>{" "}
+              {selectedOrder.sales_order_date}
+            </p>
+            <p>
+              <strong>Products</strong>
+              {selectedOrder.items.map((item, index) => (
+                <p key={index}>
+                  {item.product} x {item.quantity} (Lps {item.price.toFixed(2)})
                 </p>
-
-                {fields.map((field, index) => (
-                  <Space className="items-modal" key={field.key} align="center">
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        width: "100%",
-                      }}
-                    >
-                      <p>Name</p>
-                      <Form.Item
-                        name={[index, "product"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please select a product",
-                          },
-                        ]}
-                      >
-                        <Select
-                          placeholder="Select a Product"
-                          showSearch
-                          optionFilterProp="children"
-                          onSelect={(value) => {
-                            const selectedProduct = products.find(
-                              (product) => product.name === value
-                            );
-                            if (selectedProduct) {
-                              form.setFieldValue([`items[${index}]`], {
-                                name: selectedProduct.name,
-                                price: selectedProduct.selling_price,
-                                quantity: 0,
-                              });
-                            }
-                          }}
-                        >
-                          {products
-                            .filter((product) => product.inventory > 0)
-                            .map((product) => (
-                              <Option key={product.id} value={product.name}>
-                                {product.name} ({product.selling_price}Lps)
-                              </Option>
-                            ))}
-                        </Select>
-                      </Form.Item>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <p>Price</p>
-                      <Form.Item
-                        name={[index, "price"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please have a selling price",
-                          },
-                        ]}
-                      >
-                        <InputNumber
-                          min={1}
-                          onChange={(value) => {
-                            const selectedProduct = products.find(
-                              (product) =>
-                                product.name ===
-                                form.getFieldValue("items")[index].name
-                            );
-                            calculateSubtotal();
-                            if (selectedProduct && value) {
-                              form.setFieldValue([`items[${index}]`], {
-                                name: selectedProduct.name,
-                                price: value,
-                                quantity: 0,
-                              });
-                            }
-                          }}
-                        />
-                      </Form.Item>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <p>Quantity</p>
-                      <Form.Item
-                        name={[index, "quantity"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "Please enter a quantity",
-                          },
-                        ]}
-                      >
-                        <InputNumber
-                          min={1}
-                          onChange={() => {
-                            calculateSubtotal();
-                          }}
-                        />
-                      </Form.Item>
-                    </div>
-                    <Button
-                      danger
-                      onClick={() => remove(index)}
-                      size="middle"
-                      style={{ marginTop: "25px" }}
-                    >
-                      delete
-                    </Button>
-                  </Space>
-                ))}
-                <Button type="dashed" onClick={() => add()} size="middle" block>
-                  Add Item
-                </Button>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: "20px",
-                  }}
-                ></div>
-              </div>
-            )}
-          </Form.List>
-          <Form.Item
-            name="payed_in"
-            label="Paid In"
-            rules={[
-              { required: true, message: "Please select a payment method" },
-            ]}
-          >
-            <Select placeholder="Select payment method">
-              <Option value="Bac Credomatic: Nidia Martinez">
-                Bac Credomatic: Nidia Martinez
-              </Option>
-              <Option value="Banco Atlantida: Jose Martinez">
-                Banco Atlantida: Jose Martinez
-              </Option>
-              <Option value="Banco Occidente: Rosa Bardales">
-                Banco Occidente: Rosa Bardales
-              </Option>
-              <Option value="C807 Express: Pagado en Efectivo al recibir">
-                C807 Express: Pagado en Efectivo al recibir
-              </Option>
-              <Option value="Cash">Cash</Option>
-            </Select>
-          </Form.Item>
-          <div
-            style={{
-              marginTop: "20px",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-evenly",
-              width: "100%",
+              ))}
+            </p>
+            <p>
+              <strong>Payment Method:</strong> {selectedOrder.payed_in}
+            </p>
+            <p>
+              <strong>Subtotal:</strong> Lps {selectedOrder.subtotal.toFixed(2)}
+            </p>
+            <p>
+              <strong>Total:</strong> Lps {selectedOrder.total.toFixed(2)}
+            </p>
+            <p>
+              <strong>Notes:</strong> {selectedOrder.notes}
+            </p>
+          </div>
+        ) : (
+          <Form
+            form={form}
+            onFinish={handleSaveOrder}
+            initialValues={{
+              sales_order: "",
+              sales_order_date: "",
+              items: [],
+              subtotal: 0,
+              total: 0,
+              payed_in: undefined,
+              notes: "",
             }}
           >
             <Form.Item
-              name={"subtotal"}
-              label="Subtotal"
+              name="sales_order"
+              label="Sales Order"
               rules={[
-                {
-                  required: true,
-                  message: "Please enter a quantity",
-                },
+                { required: true, message: "Please enter a sales order" },
               ]}
             >
-              <InputNumber min={0} step={0.01} defaultValue={subtotal} />
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="sales_order_date"
+              label="Sales Order Date"
+              rules={[
+                { required: true, message: "Please select a sales order date" },
+              ]}
+            >
+              <DatePicker />
             </Form.Item>
 
+            <Form.List name="items">
+              {(fields, { add, remove }) => (
+                <div>
+                  <p
+                    style={{ fontWeight: "bold", textDecoration: "underline" }}
+                  >
+                    Products
+                  </p>
+
+                  {fields.map((field, index) => (
+                    <Space
+                      className="items-modal"
+                      key={field.key}
+                      align="center"
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          width: "100%",
+                        }}
+                      >
+                        <p>Name</p>
+                        <Form.Item
+                          name={[index, "product"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please select a product",
+                            },
+                          ]}
+                        >
+                          <Select
+                            placeholder="Select a Product"
+                            showSearch
+                            optionFilterProp="children"
+                            onSelect={(value) => {
+                              const selectedProduct = products.find(
+                                (product) => product.name === value
+                              );
+                              if (selectedProduct) {
+                                form.setFieldValue([`items[${index}]`], {
+                                  name: selectedProduct.name,
+                                  price: selectedProduct.selling_price,
+                                  quantity: 0,
+                                });
+                              }
+                            }}
+                          >
+                            {products
+                              .filter((product) => product.inventory > 0)
+                              .map((product) => (
+                                <Option key={product.id} value={product.name}>
+                                  {product.name} ({product.selling_price}Lps)
+                                </Option>
+                              ))}
+                          </Select>
+                        </Form.Item>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <p>Price</p>
+                        <Form.Item
+                          name={[index, "price"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please have a selling price",
+                            },
+                          ]}
+                        >
+                          <InputNumber
+                            min={1}
+                            onChange={(value) => {
+                              const selectedProduct = products.find(
+                                (product) =>
+                                  product.name ===
+                                  form.getFieldValue("items")[index].name
+                              );
+                              calculateSubtotal();
+                              if (selectedProduct && value) {
+                                form.setFieldValue([`items[${index}]`], {
+                                  name: selectedProduct.name,
+                                  price: value,
+                                  quantity: 0,
+                                });
+                              }
+                            }}
+                          />
+                        </Form.Item>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <p>Quantity</p>
+                        <Form.Item
+                          name={[index, "quantity"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Please enter a quantity",
+                            },
+                          ]}
+                        >
+                          <InputNumber
+                            min={1}
+                            onChange={() => {
+                              calculateSubtotal();
+                            }}
+                          />
+                        </Form.Item>
+                      </div>
+                      <Button
+                        danger
+                        onClick={() => remove(index)}
+                        size="middle"
+                        style={{ marginTop: "25px" }}
+                      >
+                        delete
+                      </Button>
+                    </Space>
+                  ))}
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    size="middle"
+                    block
+                  >
+                    Add Item
+                  </Button>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: "20px",
+                    }}
+                  ></div>
+                </div>
+              )}
+            </Form.List>
             <Form.Item
-              name={"total"}
-              label="Total"
+              name="payed_in"
+              label="Paid In"
               rules={[
-                {
-                  required: true,
-                  message: "Please enter a quantity",
-                },
+                { required: true, message: "Please select a payment method" },
               ]}
             >
-              <InputNumber min={0} step={0.01} value={total} />
+              <Select placeholder="Select payment method">
+                <Option value="Bac Credomatic: Nidia Martinez">
+                  Bac Credomatic: Nidia Martinez
+                </Option>
+                <Option value="Banco Atlantida: Jose Martinez">
+                  Banco Atlantida: Jose Martinez
+                </Option>
+                <Option value="Banco Occidente: Rosa Bardales">
+                  Banco Occidente: Rosa Bardales
+                </Option>
+                <Option value="C807 Express: Pagado en Efectivo al recibir">
+                  C807 Express: Pagado en Efectivo al recibir
+                </Option>
+                <Option value="Cash">Cash</Option>
+              </Select>
             </Form.Item>
-          </div>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit">
-                Create Order
-              </Button>
-              <Button onClick={handleCancelOrder}>Cancel</Button>
-            </Space>
-          </Form.Item>
-        </Form>
+            <Form.Item name="notes" label="Notes" rules={[{ required: false }]}>
+              <Input.TextArea rows={4} />
+            </Form.Item>
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-evenly",
+                width: "100%",
+              }}
+            >
+              <Form.Item
+                name={"subtotal"}
+                label="Subtotal"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter a quantity",
+                  },
+                ]}
+              >
+                <InputNumber min={0} step={0.01} defaultValue={subtotal} />
+              </Form.Item>
+
+              <Form.Item
+                name={"total"}
+                label="Total"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter a quantity",
+                  },
+                ]}
+              >
+                <InputNumber min={0} step={0.01} value={total} />
+              </Form.Item>
+            </div>
+            <Form.Item>
+              <Space>
+                <Button type="primary" htmlType="submit">
+                  Create Order
+                </Button>
+                <Button onClick={handleCancelOrder}>Cancel</Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        )}
       </Modal>
       <div className="month-totals">
         <Title level={4}>Sales of the Month ({filterMonth})</Title>

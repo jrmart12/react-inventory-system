@@ -16,12 +16,14 @@ const Dashboard = () => {
         return "2";
       case "/dashboard/sells":
         return "3";
-      case "/dashboard/inventory-report":
+      case "/dashboard/expenses":
         return "4";
-      case "/dashboard/sales-report":
+      case "/dashboard/inventory-report":
         return "5";
-      case "/dashboard/account":
+      case "/dashboard/sales-report":
         return "6";
+      case "/dashboard/account":
+        return "7";
       default:
         return "";
     }
@@ -48,12 +50,16 @@ const Dashboard = () => {
             <Link to="/dashboard/sells">Sales</Link>
           </Menu.Item>
           <Menu.Item key="4">
-            <Link to="/dashboard/inventory-report">Inventory Report</Link>
-          </Menu.Item>
-          <Menu.Item key="5">
-            <Link to="/dashboard/sales-report">Sales Report</Link>
+            <Link to="/dashboard/expenses">Expenses</Link>
           </Menu.Item>
           <Menu.Item key="6">
+            <Link to="/dashboard/sales-report">Sales Report</Link>
+          </Menu.Item>
+          <Menu.Item key="5">
+            <Link to="/dashboard/inventory-report">Inventory Report</Link>
+          </Menu.Item>
+
+          <Menu.Item key="7">
             <Link to="/dashboard/account">Account</Link>
           </Menu.Item>
         </Menu>
