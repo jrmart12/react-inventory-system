@@ -131,7 +131,7 @@ const Expenses: React.FC = () => {
     {
       title: "Actions",
       key: "actions",
-      render: (text: any, record: Expense) => (
+      render: (record: Expense) => (
         <Space size="middle">
           <Button
             type="link"
